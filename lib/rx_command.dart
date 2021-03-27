@@ -633,7 +633,7 @@ class RxCommandStream<TParam, TResult> extends RxCommand<TParam, TResult> {
 /// `MockCommand` allows you to easily mock an RxCommand for your Unit and UI tests
 /// Mocking a command with `mockito` https://pub.dartlang.org/packages/mockito has its limitations.
 class MockCommand<TParam, TResult> extends RxCommand<TParam, TResult> {
-  late List<CommandResult<TResult>> returnValuesForNextExecute;
+  List<CommandResult<TResult>>? returnValuesForNextExecute;
 
   /// the last value that was passed when execute or the command directly was called
   TParam? lastPassedValueToExecute;
@@ -685,7 +685,7 @@ class MockCommand<TParam, TResult> extends RxCommand<TParam, TResult> {
     print("Called Execute");
     if (returnValuesForNextExecute != null) {
       _commandResultsSubject.addStream(
-        Stream<CommandResult<TResult>>.fromIterable(returnValuesForNextExecute).map(
+        Stream<CommandResult<TResult>>.fromIterable(returnValuesForNextExecute!).map(
           (data) {
             if ((data.isExecuting || data.hasError) && _emitLastResult) {
               return CommandResult<TResult>(lastResult, data.error, data.isExecuting);
