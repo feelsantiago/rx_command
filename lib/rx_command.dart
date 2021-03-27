@@ -543,7 +543,7 @@ class RxCommandAsync<TParam, TResult> extends RxCommand<TParam, TResult> {
 class RxCommandStream<TParam, TResult> extends RxCommand<TParam, TResult> {
   StreamProvider<TParam?, TResult> _observableProvider;
 
-  late StreamSubscription<Notification<TResult>> _inputStreamSubscription;
+  StreamSubscription<Notification<TResult>>? _inputStreamSubscription;
 
   RxCommandStream._(
       StreamProvider<TParam?, TResult> provider,
