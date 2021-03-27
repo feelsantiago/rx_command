@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:rxdart/rxdart.dart';
 
-StreamMatcher crm<T>(Object data, bool hasError, bool isExceuting) {
+StreamMatcher crm<T>(Object? data, bool hasError, bool isExceuting) {
   return StreamMatcher((x) async {
     final event = await x.next as CommandResult<T>;
     if (event.data != data) return "Wong data $data != ${event.data}";
@@ -14,8 +14,7 @@ StreamMatcher crm<T>(Object data, bool hasError, bool isExceuting) {
 
     if (hasError && !(event.error is Exception)) return "Wong error type";
 
-    if (event.isExecuting != isExceuting)
-      return "Wrong isExecuting ${event.toString()}";
+    if (event.isExecuting != isExceuting) return "Wrong isExecuting ${event.toString()}";
 
     return null;
   }, "Wrong value emmited:");
@@ -29,8 +28,7 @@ void main() {
     expect(command.isExecuting, emits(false));
 
     expect(command, emits(null));
-    expect(command.results,
-        emitsInOrder([crm(null, false, true), crm(null, false, false)]));
+    expect(command.results, emitsInOrder([crm(null, false, true), crm(null, false, false)]));
 
     command.execute();
 
@@ -39,8 +37,8 @@ void main() {
   });
 
   test('Execute simple sync action with emitInitialCommandResult: true', () {
-    final command = RxCommand.createSyncNoParamNoResult(() => print("action"),
-        emitInitialCommandResult: true);
+    final command =
+        RxCommand.createSyncNoParamNoResult(() => print("action"), emitInitialCommandResult: true);
 
     command.results.listen((result) => print(result.toString()));
 
@@ -48,13 +46,8 @@ void main() {
     expect(command.isExecuting, emits(false));
 
     expect(command, emits(null));
-    expect(
-        command.results,
-        emitsInOrder([
-          crm(null, false, false),
-          crm(null, false, true),
-          crm(null, false, false)
-        ]));
+    expect(command.results,
+        emitsInOrder([crm(null, false, false), crm(null, false, true), crm(null, false, false)]));
 
     command.execute();
 
@@ -69,15 +62,14 @@ void main() {
 
     var executionCount = 0;
 
-    final command = RxCommand.createSyncNoParamNoResult(() => executionCount++,
-        canExecute: restriction);
+    final command =
+        RxCommand.createSyncNoParamNoResult(() => executionCount++, canExecute: restriction);
 
     expect(command.canExecute, emits(true));
     expect(command.isExecuting, emits(false));
 
     expect(command, emits(null));
-    expect(command.results,
-        emitsInOrder([crm(null, false, true), crm(null, false, false)]));
+    expect(command.results, emitsInOrder([crm(null, false, true), crm(null, false, false)]));
 
     command.execute();
 
@@ -102,8 +94,7 @@ void main() {
   });
 
   test('Execute simple sync action with exception  throwExceptions==true', () {
-    final command = RxCommand.createSyncNoParamNoResult(
-        () => throw Exception("Intentional"))
+    final command = RxCommand.createSyncNoParamNoResult(() => throw Exception("Intentional"))
       ..throwExceptions = true;
 
     expect(command.canExecute, emits(true));
@@ -117,15 +108,12 @@ void main() {
     expect(command.isExecuting, emits(false));
   });
 
-  test('Execute simple sync action with exception and throwExceptions==false',
-      () {
-    final command = RxCommand.createSyncNoParamNoResult(
-        () => throw Exception("Intentional"));
+  test('Execute simple sync action with exception and throwExceptions==false', () {
+    final command = RxCommand.createSyncNoParamNoResult(() => throw Exception("Intentional"));
 
     expect(command.canExecute, emits(true));
     expect(command.isExecuting, emits(false));
-    expect(command.results,
-        emitsInOrder([crm(null, false, true), crm(null, true, false)]));
+    expect(command.results, emitsInOrder([crm(null, false, true), crm(null, true, false)]));
 
     command.execute();
 
@@ -142,8 +130,7 @@ void main() {
     expect(command.canExecute, emits(true));
     expect(command.isExecuting, emits(false));
 
-    expect(command.results,
-        emitsInOrder([crm(null, false, true), crm(null, false, false)]));
+    expect(command.results, emitsInOrder([crm(null, false, true), crm(null, false, false)]));
 
     command.execute("Parameter");
 
@@ -162,8 +149,7 @@ void main() {
 
     expect(command, emits("4711"));
 
-    expect(command.results,
-        emitsInOrder([crm(null, false, true), crm("4711", false, false)]));
+    expect(command.results, emitsInOrder([crm(null, false, true), crm("4711", false, false)]));
 
     command.execute();
 
@@ -171,8 +157,7 @@ void main() {
     expect(command.isExecuting, emits(false));
   });
 
-  test('Execute simple sync function without parameter with lastResult=true',
-      () {
+  test('Execute simple sync function without parameter with lastResult=true', () {
     final command = RxCommand.createSyncNoParam<String>(() {
       print("action: ");
       return "4711";
@@ -201,7 +186,7 @@ void main() {
 
   test('Execute simple sync function with parameter', () {
     final command = RxCommand.createSync<String, String>((s) {
-      print("action: " + s);
+      print("action: " + s!);
       return s + s;
     });
 
@@ -210,8 +195,7 @@ void main() {
 
     expect(command, emits("47114711"));
 
-    expect(command.results,
-        emitsInOrder([crm(null, false, true), crm("47114711", false, false)]));
+    expect(command.results, emitsInOrder([crm(null, false, true), crm("47114711", false, false)]));
 
     command.execute("4711");
 
@@ -232,7 +216,7 @@ void main() {
 
     final command = RxCommand.createAsyncNoResult<String>((s) async {
       executionCount++;
-      await slowAsyncFunction(s);
+      await slowAsyncFunction(s!);
     });
 
     command.canExecute.listen((b) {
@@ -244,11 +228,9 @@ void main() {
 
     expect(command.canExecute, emitsInOrder([true, false, true]),
         reason: "Canexecute before false");
-    expect(command.isExecuting, emits(false),
-        reason: "IsExecuting before true");
+    expect(command.isExecuting, emits(false), reason: "IsExecuting before true");
 
-    expect(command.results,
-        emitsInOrder([crm(null, false, true), crm(null, false, false)]));
+    expect(command.results, emitsInOrder([crm(null, false, true), crm(null, false, false)]));
 
     command.execute("Done");
     await Future.delayed(Duration.zero);
@@ -257,13 +239,12 @@ void main() {
     expect(executionCount, 1);
   });
 
-  test('Execute simple async function with parameter and return value',
-      () async {
+  test('Execute simple async function with parameter and return value', () async {
     var executionCount = 0;
 
     final command = RxCommand.createAsync<String, String>((s) async {
       executionCount++;
-      return slowAsyncFunction(s);
+      return slowAsyncFunction(s!);
     });
 
     command.canExecute.listen((b) {
@@ -274,16 +255,14 @@ void main() {
     });
 
     command.listen((s) {
-      print("Results:" + s);
+      print("Results:" + s!);
     });
 
     expect(command.canExecute, emitsInOrder([true, false, true]),
         reason: "Canexecute before false");
-    expect(command.isExecuting, emits(false),
-        reason: "IsExecuting before true");
+    expect(command.isExecuting, emits(false), reason: "IsExecuting before true");
 
-    expect(command.results,
-        emitsInOrder([crm(null, false, true), crm("Done", false, false)]));
+    expect(command.results, emitsInOrder([crm(null, false, true), crm("Done", false, false)]));
     expect(command, emits("Done"));
 
     command.execute("Done");
@@ -298,7 +277,7 @@ void main() {
 
     final command = RxCommand.createAsync<String, String>((s) async {
       executionCount++;
-      return slowAsyncFunction(s);
+      return slowAsyncFunction(s!);
     });
 
     command.canExecute.listen((b) {
@@ -309,17 +288,15 @@ void main() {
     });
 
     command.listen((s) {
-      print("Results:" + s);
+      print("Results:" + s!);
     });
 
     expect(command.canExecute, emitsInOrder([true, false, true]),
         reason: "Canexecute before false");
     expect(command.isExecuting, emitsInOrder([false, true, false]));
-    expect(command.isExecuting, emits(false),
-        reason: "IsExecuting before true");
+    expect(command.isExecuting, emits(false), reason: "IsExecuting before true");
 
-    expect(command.results,
-        emitsInOrder([crm(null, false, true), crm("Done", false, false)]));
+    expect(command.results, emitsInOrder([crm(null, false, true), crm("Done", false, false)]));
     expect(command, emits("Done"));
 
     command.execute("Done");
@@ -336,7 +313,7 @@ void main() {
 
     final command = RxCommand.createAsync<String, String>((s) async {
       executionCount++;
-      return slowAsyncFunction(s);
+      return slowAsyncFunction(s!);
     });
 
     command.canExecute.listen((b) {
@@ -347,15 +324,13 @@ void main() {
     });
 
     command.listen((s) {
-      print("Results:" + s);
+      print("Results:" + s!);
     });
 
     expect(command.canExecute, emitsInOrder([true, false, true, false, true]),
         reason: "Canexecute wrong");
-    expect(
-        command.isExecuting, emitsInOrder([false, true, false, true, false]));
-    expect(command.isExecuting, emits(false),
-        reason: "IsExecuting before true");
+    expect(command.isExecuting, emitsInOrder([false, true, false, true, false]));
+    expect(command.isExecuting, emits(false), reason: "IsExecuting before true");
 
     expect(
         command.results,
@@ -377,14 +352,12 @@ void main() {
     expect(executionCount, 2);
   });
 
-  test(
-      'Execute simple async function called twice with delay and emitLastResult=true',
-      () async {
+  test('Execute simple async function called twice with delay and emitLastResult=true', () async {
     var executionCount = 0;
 
     final command = RxCommand.createAsync<String, String>((s) async {
       executionCount++;
-      return slowAsyncFunction(s);
+      return slowAsyncFunction(s!);
     }, emitLastResult: true);
 
     command.canExecute.listen((b) {
@@ -395,13 +368,12 @@ void main() {
     });
 
     command.listen((s) {
-      print("Results:" + s);
+      print("Results:" + s!);
     });
 
     expect(command.canExecute, emitsInOrder([true, false, true, false, true]),
         reason: "Canexecute wrong");
-    expect(command.isExecuting, emits(false),
-        reason: "IsExecuting before true");
+    expect(command.isExecuting, emits(false), reason: "IsExecuting before true");
 
     expect(
         command.results,
@@ -422,19 +394,17 @@ void main() {
     expect(executionCount, 2);
   });
 
-  Future<String> slowAsyncFunctionFail(String s) async {
+  Future<String> slowAsyncFunctionFail(String? s) async {
     print("___Start____Action___Will throw_______");
 
     throw Exception("Intentionally");
   }
 
   test('async function with exception and throwExceptions==true', () async {
-    final command =
-        RxCommand.createAsync<String, String>(slowAsyncFunctionFail);
+    final command = RxCommand.createAsync<String?, String?>(slowAsyncFunctionFail);
     command.throwExceptions = true;
 
-    command.listen((s) => print('Listen: $s'),
-        onError: (e) => print('OnError:$e'));
+    command.listen((s) => print('Listen: $s'), onError: (e) => print('OnError:$e'));
 
     expect(command.canExecute, emits(true));
     expect(command.isExecuting, emits(false));
@@ -464,16 +434,14 @@ void main() {
   });
 
   test('async function with exception with and throwExceptions==false', () {
-    final command =
-        RxCommand.createAsync<String, String>(slowAsyncFunctionFail);
+    final command = RxCommand.createAsync<String, String>(slowAsyncFunctionFail);
 
     command.thrownExceptions.listen((e) => print(e.toString()));
 
     expect(command.canExecute, emits(true));
     expect(command.isExecuting, emits(false));
 
-    expect(command.results,
-        emitsInOrder([crm(null, false, true), crm(null, true, false)]));
+    expect(command.results, emitsInOrder([crm(null, false, true), crm(null, true, false)]));
     expect(command.thrownExceptions, emits(isException));
 
     command.execute("Done");
@@ -511,8 +479,8 @@ void main() {
     expect(didntThrow, false);
   });
 
-  Stream<int> testProvider(int i) async* {
-    yield i;
+  Stream<int> testProvider(int? i) async* {
+    yield i!;
     yield i + 1;
     yield i + 2;
   }
@@ -532,8 +500,7 @@ void main() {
     });
 
     expect(command.canExecute, emits(true), reason: "Canexecute before false");
-    expect(command.isExecuting, emits(false),
-        reason: "IsExecuting before true");
+    expect(command.isExecuting, emits(false), reason: "IsExecuting before true");
 
     expect(
         command.results,
@@ -552,7 +519,7 @@ void main() {
     expect(command.isExecuting, emits(false));
   });
 
-  Stream<int> testProviderError(int i) async* {
+  Stream<int> testProviderError(int? i) async* {
     throw Exception();
   }
 
@@ -571,11 +538,9 @@ void main() {
     });
 
     expect(command.canExecute, emits(true), reason: "Canexecute before false");
-    expect(command.isExecuting, emits(false),
-        reason: "IsExecuting before true");
+    expect(command.isExecuting, emits(false), reason: "IsExecuting before true");
 
-    expect(command.results,
-        emitsInOrder([crm(null, false, true), crm(null, true, false)]));
+    expect(command.results, emitsInOrder([crm(null, false, true), crm(null, true, false)]));
 
     expect(command.thrownExceptions, emits(TypeMatcher<Exception>()));
 
@@ -633,7 +598,7 @@ void main() {
 
 // No idea why it's not posible to catch the exception with     expect(command.results, emitsError(isException));
 /*
-    test('RxCommand.createFromStreamWithException throw exeption = true', () 
+    test('RxCommand.createFromStreamWithException throw exeption = true', ()
   {
 
     final command  = RxCommand.createFromStream<int,int>( testProviderError);
@@ -650,12 +615,12 @@ void main() {
 
     expect(command.results, emitsError(isException));
     expect(command, emitsError(isException));
-    
+
 
     command.execute(1);
 
     expect(command.canExecute, emits(true),reason: "Canexecute after false");
-    expect(command.isExecuting, emits(false));    
+    expect(command.isExecuting, emits(false));
   });
 
 */
