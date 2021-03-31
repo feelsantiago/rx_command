@@ -3,7 +3,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:rx_command/rx_command.dart';
 
 class RxCommandListener<TParam, TResult> {
-  StreamSubscription<TResult>? valueSubscription;
+  StreamSubscription<TResult?>? valueSubscription;
   StreamSubscription<CommandResult>? resultsSubscription;
   StreamSubscription<bool>? busyChangeSubscription;
   StreamSubscription<bool>? busySubscription;
@@ -13,7 +13,7 @@ class RxCommandListener<TParam, TResult> {
   final RxCommand<TParam, TResult> command;
 
   // Is called on every emitted value of the command
-  final void Function(TResult value)? onValue;
+  final void Function(TResult? value)? onValue;
   // Is called when isExecuting changes
   final void Function(bool isBusy)? onIsBusyChange;
   // Is called on exceptions in the wrapped command function
