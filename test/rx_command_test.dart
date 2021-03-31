@@ -40,7 +40,7 @@ void main() {
     final command =
         RxCommand.createSyncNoParamNoResult(() => print("action"), emitInitialCommandResult: true);
 
-    command.results.listen((result) => print(result.toString()));
+    command.results!.listen((result) => print(result.toString()));
 
     expect(command.canExecute, emits(true));
     expect(command.isExecuting, emits(false));
@@ -203,7 +203,7 @@ void main() {
     expect(command.isExecuting, emits(false));
   });
 
-  Future<String> slowAsyncFunction(String s) async {
+  Future<String?> slowAsyncFunction(String? s) async {
     print("___Start____Action__________");
 
     await Future.delayed(const Duration(milliseconds: 10));
@@ -242,7 +242,7 @@ void main() {
   test('Execute simple async function with parameter and return value', () async {
     var executionCount = 0;
 
-    final command = RxCommand.createAsync<String, String>((s) async {
+    final command = RxCommand.createAsync<String, String?>((s) async {
       executionCount++;
       return slowAsyncFunction(s!);
     });
@@ -275,7 +275,7 @@ void main() {
   test('Execute simple async function call while already running', () async {
     var executionCount = 0;
 
-    final command = RxCommand.createAsync<String, String>((s) async {
+    final command = RxCommand.createAsync<String, String?>((s) async {
       executionCount++;
       return slowAsyncFunction(s!);
     });
@@ -311,7 +311,7 @@ void main() {
   test('Execute simple async function called twice with delay', () async {
     var executionCount = 0;
 
-    final command = RxCommand.createAsync<String, String>((s) async {
+    final command = RxCommand.createAsync<String, String?>((s) async {
       executionCount++;
       return slowAsyncFunction(s!);
     });
@@ -355,7 +355,7 @@ void main() {
   test('Execute simple async function called twice with delay and emitLastResult=true', () async {
     var executionCount = 0;
 
-    final command = RxCommand.createAsync<String, String>((s) async {
+    final command = RxCommand.createAsync<String, String?>((s) async {
       executionCount++;
       return slowAsyncFunction(s!);
     }, emitLastResult: true);
@@ -463,7 +463,7 @@ void main() {
   });
 
   test("async functions that throw should be next'able", () async {
-    final cmd = RxCommand.createAsync((_) async {
+    final RxCommand<dynamic, Null> cmd = RxCommand.createAsync((_) async {
       await Future.delayed(Duration(milliseconds: 1));
       throw Exception("oh no");
     });
@@ -533,7 +533,7 @@ void main() {
       print("Is executing:" + b.toString());
     });
 
-    command.results.listen((i) {
+    command.results!.listen((i) {
       print("Results:" + i.toString());
     });
 
@@ -553,13 +553,13 @@ void main() {
   test('RxCommand.createFromStreamWithException2', () {
     var streamController = StreamController<String>.broadcast();
 
-    var command = RxCommand.createFromStream((_) {
+    RxCommand<dynamic, Null> command = RxCommand.createFromStream((_) {
       return streamController.stream.map((rideMap) {
         throw Exception();
       });
     });
 
-    command.results.listen((r) {
+    command.results!.listen((r) {
       print(r.toString());
     });
 
@@ -577,7 +577,7 @@ void main() {
   });
 
   test('RxCommand.createFromStreamWithExceptionOnlyThrown once', () async {
-    var command = RxCommand.createFromStream((_) {
+    RxCommand<dynamic, Null> command = RxCommand.createFromStream((_) {
       return Stream.value('test').map((rideMap) {
         throw Exception('TestException');
       });

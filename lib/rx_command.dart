@@ -95,11 +95,11 @@ abstract class RxCommand<TParam, TResult> extends StreamView<TResult?> {
         ? BehaviorSubject<CommandResult<TResult>>()
         : PublishSubject<CommandResult<TResult>>();
 
-    _commandResultsSubject
+    _commandResultsSubject!
         .where((x) => x.hasError)
         .listen((x) => _thrownExceptionsSubject.add(x.error), onError: (x) {});
 
-    _commandResultsSubject.listen((x) => _isExecutingSubject.add(x.isExecuting), onError: (x) {});
+    _commandResultsSubject!.listen((x) => _isExecutingSubject.add(x.isExecuting), onError: (x) {});
 
     final _canExecuteParam = canExecuteRestriction == null
         ? Stream<bool>.value(true)
@@ -148,11 +148,11 @@ abstract class RxCommand<TParam, TResult> extends StreamView<TResult?> {
   /// [emitInitialCommandResult=true].
   /// By default the [results] Observable and the [RxCommand] itself behave like a PublishSubject. If you want that it acts like
   /// a BehaviourSubject, meaning every listener gets the last received value, you can set [emitsLastValueToNewSubscriptions = true].
-  static RxCommand<TParam?, void> createSyncNoResult<TParam>(Action1<TParam?> action,
+  static RxCommand<TParam, void> createSyncNoResult<TParam>(Action1<TParam?> action,
       {Stream<bool>? canExecute,
       bool emitInitialCommandResult = false,
       bool emitsLastValueToNewSubscriptions = false}) {
-    return RxCommandSync<TParam?, void>((x) {
+    return RxCommandSync<TParam, void>((x) {
       action(x);
       return null;
     }, canExecute, emitInitialCommandResult, false, emitsLastValueToNewSubscriptions, null);
@@ -172,13 +172,13 @@ abstract class RxCommand<TParam, TResult> extends StreamView<TResult?> {
   /// a BehaviourSubject, meaning every listener gets the last received value, you can set [emitsLastValueToNewSubscriptions = true].
   /// [initialLastResult] sets the value of the [lastResult] property before the first item was received. This is helpful if you use
   /// [lastResult] as `initialData` of a `StreamBuilder`
-  static RxCommand<void, TResult> createSyncNoParam<TResult>(Func<TResult> func,
+  static RxCommand<void, TResult?> createSyncNoParam<TResult>(Func<TResult> func,
       {Stream<bool>? canExecute,
       bool emitInitialCommandResult = false,
       bool emitLastResult = false,
       bool emitsLastValueToNewSubscriptions = false,
       TResult? initialLastResult}) {
-    return RxCommandSync<void, TResult>((_) => func(), canExecute, emitInitialCommandResult,
+    return RxCommandSync<void, TResult?>((_) => func(), canExecute, emitInitialCommandResult,
         emitLastResult, emitsLastValueToNewSubscriptions, initialLastResult);
   }
 
@@ -196,13 +196,13 @@ abstract class RxCommand<TParam, TResult> extends StreamView<TResult?> {
   /// a BehaviourSubject, meaning every listener gets the last received value, you can set [emitsLastValueToNewSubscriptions = true].
   /// [initialLastResult] sets the value of the [lastResult] property before the first item was received. This is helpful if you use
   /// [lastResult] as `initialData` of a `StreamBuilder`
-  static RxCommand<TParam?, TResult> createSync<TParam, TResult>(Func1<TParam?, TResult> func,
+  static RxCommand<TParam, TResult?> createSync<TParam, TResult>(Func1<TParam?, TResult> func,
       {Stream<bool>? canExecute,
       bool emitInitialCommandResult = false,
       bool emitLastResult = false,
       bool emitsLastValueToNewSubscriptions = false,
       TResult? initialLastResult}) {
-    return RxCommandSync<TParam?, TResult>((x) => func(x), canExecute, emitInitialCommandResult,
+    return RxCommandSync<TParam, TResult?>((x) => func(x), canExecute, emitInitialCommandResult,
         emitLastResult, emitsLastValueToNewSubscriptions, initialLastResult);
   }
 
@@ -240,11 +240,11 @@ abstract class RxCommand<TParam, TResult> extends StreamView<TResult?> {
   /// [emitInitialCommandResult=true].
   /// By default the [results] Observable and the [RxCommand] itself behave like a PublishSubject. If you want that it acts like
   /// a BehaviourSubject, meaning every listener gets the last received value, you can set [emitsLastValueToNewSubscriptions = true].
-  static RxCommand<TParam?, void> createAsyncNoResult<TParam>(AsyncAction1<TParam?> action,
+  static RxCommand<TParam, void> createAsyncNoResult<TParam>(AsyncAction1<TParam?> action,
       {Stream<bool>? canExecute,
       bool emitInitialCommandResult = false,
       bool emitsLastValueToNewSubscriptions = false}) {
-    return RxCommandAsync<TParam?, void>((x) async {
+    return RxCommandAsync<TParam, void>((x) async {
       await action(x);
       return null;
     }, canExecute, emitInitialCommandResult, false, emitsLastValueToNewSubscriptions, null);
@@ -264,13 +264,13 @@ abstract class RxCommand<TParam, TResult> extends StreamView<TResult?> {
   /// a BehaviourSubject, meaning every listener gets the last received value, you can set [emitsLastValueToNewSubscriptions = true].
   /// [initialLastResult] sets the value of the [lastResult] property before the first item was received. This is helpful if you use
   /// [lastResult] as `initialData` of a `StreamBuilder`
-  static RxCommand<void, TResult> createAsyncNoParam<TResult>(AsyncFunc<TResult> func,
+  static RxCommand<void, TResult?> createAsyncNoParam<TResult>(AsyncFunc<TResult> func,
       {Stream<bool>? canExecute,
       bool emitInitialCommandResult = false,
       bool emitLastResult = false,
       bool emitsLastValueToNewSubscriptions = false,
       TResult? initialLastResult}) {
-    return RxCommandAsync<void, TResult>((_) async => func(), canExecute, emitInitialCommandResult,
+    return RxCommandAsync<void, TResult?>((_) async => func(), canExecute, emitInitialCommandResult,
         emitLastResult, emitsLastValueToNewSubscriptions, initialLastResult);
   }
 
@@ -288,13 +288,13 @@ abstract class RxCommand<TParam, TResult> extends StreamView<TResult?> {
   /// a BehaviourSubject, meaning every listener gets the last received value, you can set [emitsLastValueToNewSubscriptions = true].
   /// [initialLastResult] sets the value of the [lastResult] property before the first item was received. This is helpful if you use
   /// [lastResult] as `initialData` of a `StreamBuilder`
-  static RxCommand<TParam?, TResult> createAsync<TParam, TResult>(AsyncFunc1<TParam?, TResult> func,
+  static RxCommand<TParam, TResult?> createAsync<TParam, TResult>(AsyncFunc1<TParam?, TResult> func,
       {Stream<bool>? canExecute,
       bool emitInitialCommandResult = false,
       bool emitLastResult = false,
       bool emitsLastValueToNewSubscriptions = false,
       TResult? initialLastResult}) {
-    return RxCommandAsync<TParam?, TResult>(
+    return RxCommandAsync<TParam, TResult?>(
         (x) async => func(x),
         canExecute,
         emitInitialCommandResult,
@@ -317,14 +317,14 @@ abstract class RxCommand<TParam, TResult> extends StreamView<TResult?> {
   /// a BehaviourSubject, meaning every listener gets the last received value, you can set [emitsLastValueToNewSubscriptions = true].
   /// [initialLastResult] sets the value of the [lastResult] property before the first item was received. This is helpful if you use
   /// [lastResult] as `initialData` of a `StreamBuilder`
-  static RxCommand<TParam, TResult> createFromStream<TParam, TResult>(
+  static RxCommand<TParam, TResult?> createFromStream<TParam, TResult>(
       StreamProvider<TParam?, TResult> provider,
       {Stream<bool>? canExecute,
       bool emitInitialCommandResult = false,
       bool emitLastResult = false,
       bool emitsLastValueToNewSubscriptions = false,
       TResult? initialLastResult}) {
-    return RxCommandStream<TParam, TResult>(provider, canExecute, emitInitialCommandResult,
+    return RxCommandStream<TParam, TResult?>(provider, canExecute, emitInitialCommandResult,
         emitLastResult, emitsLastValueToNewSubscriptions, initialLastResult);
   }
 
@@ -339,7 +339,7 @@ abstract class RxCommand<TParam, TResult> extends StreamView<TResult?> {
 
   /// emits [CommandResult<TRESULT>] the combined state of the command, which is often easier in combination with Flutter `StreamBuilder`
   /// because you have all state information at one place.
-  Stream<CommandResult<TResult>> get results => _commandResultsSubject;
+  Stream<CommandResult<TResult>>? get results => _commandResultsSubject;
 
   /// Observable stream that issues a bool on any execution state change of the command
   Stream<bool> get isExecuting => _isExecutingSubject.startWith(false).distinct();
@@ -357,8 +357,8 @@ abstract class RxCommand<TParam, TResult> extends StreamView<TResult?> {
   Future<TResult?> get next =>
       Rx.merge([this, this.thrownExceptions.cast<TResult?>()]).take(1).last;
 
-  late Subject<CommandResult<TResult>> _commandResultsSubject;
-  final Subject<TResult?> _resultsSubject;
+  Subject<CommandResult<TResult>>? _commandResultsSubject;
+  final Subject<TResult> _resultsSubject;
   final BehaviorSubject<bool> _isExecutingSubject = BehaviorSubject<bool>();
   final BehaviorSubject<bool> _canExecuteSubject = BehaviorSubject<bool>();
   final PublishSubject<dynamic> _thrownExceptionsSubject = PublishSubject<dynamic>();
@@ -370,7 +370,7 @@ abstract class RxCommand<TParam, TResult> extends StreamView<TResult?> {
   /// If you don't need a command any longer it is a good practise to
   /// dispose it to make sure all stream subscriptions are cancelled to prevent memory leaks
   void dispose() {
-    _commandResultsSubject.close();
+    _commandResultsSubject!.close();
     _isExecutingSubject.close();
     _canExecuteSubject.close();
     _thrownExceptionsSubject.close();
@@ -389,7 +389,7 @@ class RxCommandSync<TParam, TResult> extends RxCommand<TParam, TResult> {
       bool emitInitialCommandResult,
       bool emitLastResult,
       bool emitsLastValueToNewSubscriptions,
-      TResult? initialLastResult) {
+      TResult initialLastResult) {
     return RxCommandSync._(
         func,
         emitsLastValueToNewSubscriptions || emitInitialCommandResult
@@ -409,11 +409,11 @@ class RxCommandSync<TParam, TResult> extends RxCommand<TParam, TResult> {
       bool buffer,
       bool isBehaviourSubject,
       bool emitInitialCommandResult,
-      TResult? initialLastResult)
+      TResult initialLastResult)
       : _func = func,
         super(subject, canExecute, buffer, isBehaviourSubject, initialLastResult) {
     if (emitInitialCommandResult) {
-      _commandResultsSubject.add(CommandResult<TResult>(null, null, false));
+      _commandResultsSubject!.add(CommandResult<TResult>(null, null, false));
     }
   }
 
@@ -430,24 +430,24 @@ class RxCommandSync<TParam, TResult> extends RxCommand<TParam, TResult> {
       _canExecuteSubject.add(false);
     }
 
-    _commandResultsSubject
+    _commandResultsSubject!
         .add(CommandResult<TResult>(_emitLastResult ? lastResult : null, null, true));
 
     try {
       final result = _func(param);
       lastResult = result;
-      _commandResultsSubject.add(CommandResult<TResult>(result, null, false));
+      _commandResultsSubject!.add(CommandResult<TResult>(result, null, false));
       _resultsSubject.add(result);
     } catch (error) {
       if (throwExceptions) {
         _resultsSubject.addError(error);
-        _commandResultsSubject.addError(error);
+        _commandResultsSubject!.addError(error);
         _isExecutingSubject
             .add(false); // Has to be done because in this case no command result is queued
         return;
       }
 
-      _commandResultsSubject
+      _commandResultsSubject!
           .add(CommandResult<TResult>(_emitLastResult ? lastResult : null, error, false));
     } finally {
       _isRunning = false;
@@ -467,11 +467,11 @@ class RxCommandAsync<TParam, TResult> extends RxCommand<TParam, TResult> {
       bool emitLastResult,
       bool isBehaviourSubject,
       bool emitInitialCommandResult,
-      TResult? initialLastResult)
+      TResult initialLastResult)
       : _func = func,
         super(subject, canExecute, emitLastResult, isBehaviourSubject, initialLastResult) {
     if (emitInitialCommandResult) {
-      _commandResultsSubject.add(CommandResult<TResult>(null, null, false));
+      _commandResultsSubject!.add(CommandResult<TResult>(null, null, false));
     }
   }
 
@@ -481,7 +481,7 @@ class RxCommandAsync<TParam, TResult> extends RxCommand<TParam, TResult> {
       bool emitInitialCommandResult,
       bool emitLastResult,
       bool emitsLastValueToNewSubscriptions,
-      TResult? initialLastResult) {
+      TResult initialLastResult) {
     return RxCommandAsync._(
         func,
         emitsLastValueToNewSubscriptions || emitInitialCommandResult
@@ -509,13 +509,13 @@ class RxCommandAsync<TParam, TResult> extends RxCommand<TParam, TResult> {
       _canExecuteSubject.add(false);
     }
 
-    _commandResultsSubject
+    _commandResultsSubject!
         .add(CommandResult<TResult>(_emitLastResult ? lastResult : null, null, true));
 
     _func(param).asStream().handleError((error) {
       if (throwExceptions) {
         _resultsSubject.addError(error as Object);
-        _commandResultsSubject.addError(error);
+        _commandResultsSubject!.addError(error);
         _isRunning = false;
         _isExecutingSubject
             .add(false); // Has to be done because in this case no command result is queued
@@ -524,13 +524,13 @@ class RxCommandAsync<TParam, TResult> extends RxCommand<TParam, TResult> {
         return;
       }
 
-      _commandResultsSubject
+      _commandResultsSubject!
           .add(CommandResult<TResult>(_emitLastResult ? lastResult : null, error, false));
       _isRunning = false;
       _canExecute = !_executionLocked;
       _canExecuteSubject.add(!_executionLocked);
     }).listen((result) {
-      _commandResultsSubject.add(CommandResult<TResult>(result, null, false));
+      _commandResultsSubject!.add(CommandResult<TResult>(result, null, false));
       lastResult = result;
       _resultsSubject.add(result);
       _isRunning = false;
@@ -556,7 +556,7 @@ class RxCommandStream<TParam, TResult> extends RxCommand<TParam, TResult> {
       : _observableProvider = provider,
         super(subject, canExecute, emitLastResult, isBehaviourSubject, initialLastResult) {
     if (emitInitialCommandResult) {
-      _commandResultsSubject.add(CommandResult<TResult>(null, null, false));
+      _commandResultsSubject!.add(CommandResult<TResult>(null, null, false));
     }
   }
 
@@ -592,7 +592,7 @@ class RxCommandStream<TParam, TResult> extends RxCommand<TParam, TResult> {
       _canExecuteSubject.add(false);
     }
 
-    _commandResultsSubject
+    _commandResultsSubject!
         .add(CommandResult<TResult>(_emitLastResult ? lastResult : null, null, true));
 
     var inputStream = _observableProvider(param);
@@ -601,18 +601,18 @@ class RxCommandStream<TParam, TResult> extends RxCommand<TParam, TResult> {
       (notification) {
         if (notification.isOnData) {
           _resultsSubject.add(notification.requireData);
-          _commandResultsSubject.add(CommandResult(notification.requireData, null, true));
+          _commandResultsSubject!.add(CommandResult(notification.requireData, null, true));
           lastResult = notification.requireData;
         } else if (notification.isOnError) {
           if (throwExceptions) {
-            _resultsSubject.addError(notification.errorAndStackTrace?.error ?? Error());
-            _commandResultsSubject.addError(notification.errorAndStackTrace?.error ?? Error());
+            _resultsSubject.addError(notification.errorAndStackTrace!.error);
+            _commandResultsSubject!.addError(notification.errorAndStackTrace!.error);
           } else {
-            _commandResultsSubject
-                .add(CommandResult<TResult>(null, notification.errorAndStackTrace?.error, false));
+            _commandResultsSubject!
+                .add(CommandResult<TResult>(null, notification.errorAndStackTrace!.error, false));
           }
         } else if (notification.isOnDone) {
-          _commandResultsSubject.add(CommandResult(lastResult, null, false));
+          _commandResultsSubject!.add(CommandResult(lastResult, null, false));
           _isRunning = false;
           _canExecuteSubject.add(!_executionLocked);
         }
@@ -632,7 +632,7 @@ class RxCommandStream<TParam, TResult> extends RxCommand<TParam, TResult> {
 
 /// `MockCommand` allows you to easily mock an RxCommand for your Unit and UI tests
 /// Mocking a command with `mockito` https://pub.dartlang.org/packages/mockito has its limitations.
-class MockCommand<TParam, TResult> extends RxCommand<TParam, TResult> {
+class MockCommand<TParam, TResult> extends RxCommand<TParam, TResult?> {
   List<CommandResult<TResult>>? returnValuesForNextExecute;
 
   /// the last value that was passed when execute or the command directly was called
@@ -654,16 +654,16 @@ class MockCommand<TParam, TResult> extends RxCommand<TParam, TResult> {
         emitLastResult,
         false,
         emitInitialCommandResult,
-        initialLastResult);
+        initialLastResult!);
   }
 
   MockCommand._(Subject<TResult> subject, Stream<bool>? canExecute, bool emitLastResult,
-      bool isBehaviourSubject, bool emitInitialCommandResult, TResult? initialLastResult)
+      bool isBehaviourSubject, bool emitInitialCommandResult, TResult initialLastResult)
       : super(subject, canExecute, emitLastResult, isBehaviourSubject, initialLastResult) {
     if (emitInitialCommandResult) {
-      _commandResultsSubject.add(CommandResult<TResult>(null, null, false));
+      _commandResultsSubject!.add(CommandResult<TResult>(null, null, false));
     }
-    _commandResultsSubject
+    _commandResultsSubject!
         .where((result) => result.hasData)
         .listen((result) => _resultsSubject.add(result.data));
   }
@@ -684,7 +684,7 @@ class MockCommand<TParam, TResult> extends RxCommand<TParam, TResult> {
     lastPassedValueToExecute = param;
     print("Called Execute");
     if (returnValuesForNextExecute != null) {
-      _commandResultsSubject.addStream(
+      _commandResultsSubject!.addStream(
         Stream<CommandResult<TResult>>.fromIterable(returnValuesForNextExecute!).map(
           (data) {
             if ((data.isExecuting || data.hasError) && _emitLastResult) {
@@ -707,7 +707,7 @@ class MockCommand<TParam, TResult> extends RxCommand<TParam, TResult> {
   /// error: null
   /// isExecuting : true
   void startExecution() {
-    _commandResultsSubject.add(CommandResult(_emitLastResult ? lastResult : null, null, true));
+    _commandResultsSubject!.add(CommandResult(_emitLastResult ? lastResult : null, null, true));
     _canExecuteSubject.add(false);
   }
 
@@ -717,7 +717,7 @@ class MockCommand<TParam, TResult> extends RxCommand<TParam, TResult> {
   /// isExecuting : false
   void endExecutionWithData(TResult data) {
     lastResult = data;
-    _commandResultsSubject.add(CommandResult<TResult>(data, null, false));
+    _commandResultsSubject!.add(CommandResult<TResult>(data, null, false));
     _canExecuteSubject.add(true);
   }
 
@@ -726,7 +726,7 @@ class MockCommand<TParam, TResult> extends RxCommand<TParam, TResult> {
   /// error: Exeption([message])
   /// isExecuting : false
   void endExecutionWithError(String message) {
-    _commandResultsSubject.add(
+    _commandResultsSubject!.add(
         CommandResult<TResult>(_emitLastResult ? lastResult : null, Exception(message), false));
     _canExecuteSubject.add(true);
   }
@@ -736,7 +736,7 @@ class MockCommand<TParam, TResult> extends RxCommand<TParam, TResult> {
   /// error: null
   /// isExecuting : false
   void endExecutionNoData() {
-    _commandResultsSubject
+    _commandResultsSubject!
         .add(CommandResult<TResult>(_emitLastResult ? lastResult : null, null, true));
     _canExecuteSubject.add(true);
   }
